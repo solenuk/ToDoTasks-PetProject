@@ -6,6 +6,7 @@ import com.solenuk.todotaskspetproject.dtos.request.CreateTaskDTO;
 import com.solenuk.todotaskspetproject.dtos.request.UpdateTaskDTO;
 import com.solenuk.todotaskspetproject.dtos.response.ResponseTaskDTO;
 import com.solenuk.todotaskspetproject.entities.Task;
+import com.solenuk.todotaskspetproject.entities.TaskCollaborator;
 import com.solenuk.todotaskspetproject.enums.TaskPriority;
 import com.solenuk.todotaskspetproject.enums.TaskState;
 import com.solenuk.todotaskspetproject.mappers.TaskMapper;
@@ -39,6 +40,7 @@ class TaskServiceImplTest {
     private final TaskPriority defaultPriority = TaskPriority.HIGH;
     private final TaskState defaultState = TaskState.NEW;
     private final Integer defaultCreatorId = 42;
+    private final Integer defaultCollaboratorId = 2;
 
     @Test
     @DisplayName("createTask should return DTO when task is created")
@@ -122,8 +124,8 @@ class TaskServiceImplTest {
     }
 
     @Test
-    @DisplayName("getTasksByCreatorId should return list of DTOs for a specific creator")
-    void getTasksByCreatorId_ShouldReturnListOfDTOs_ForSpecificCreator() {
+    @DisplayName("getTasksForUser should return list of DTOs for a specific creator")
+    void getTasksForUser_ShouldReturnListOfDTOs_ForSpecificCreator() {
         Task mockedEntity = new Task();
         List<Task> userTasks = List.of(mockedEntity);
         ResponseTaskDTO expectedResponse = new ResponseTaskDTO(
@@ -131,14 +133,14 @@ class TaskServiceImplTest {
             null
         );
 
-        when(repository.findAllByCreatorId(defaultCreatorId)).thenReturn(userTasks);
+        when(repository.findAllTasksForUser(defaultCreatorId)).thenReturn(userTasks);
         when(mapper.toResponse(mockedEntity)).thenReturn(expectedResponse);
 
         List<ResponseTaskDTO> actualResponse = service.getTasksForUser(defaultCreatorId);
 
         assertNotNull(actualResponse);
         assertEquals(1, actualResponse.size());
-        verify(repository, times(1)).findAllByCreatorId(defaultCreatorId);
+        verify(repository, times(1)).findAllTasksForUser(defaultCreatorId);
     }
 
     @Test
@@ -189,5 +191,100 @@ class TaskServiceImplTest {
 
         assertEquals("Task not found with ID: " + missingId, exception.getMessage());
         verify(repository, never()).deleteById(any());
+    }
+
+    @Test
+    @DisplayName("addCollaborator should append collaborator when requester is creator and entry is new")
+    void addCollaborator_ShouldAddCollaborator_WhenValid() {
+        Task task = Task.builder()
+            .id(defaultId)
+            .title(defaultTitle)
+            .creatorId(defaultCreatorId)
+            .build();
+
+        when(repository.findById(defaultId)).thenReturn(Optional.of(task));
+
+        service.addCollaborator(defaultId, defaultCollaboratorId, defaultCreatorId);
+
+        assertEquals(1, task.getCollaborators().size());
+        assertEquals(defaultCollaboratorId, task.getCollaborators().getFirst().getUserId());
+        verify(repository, times(1)).save(task);
+    }
+
+    @Test
+    @DisplayName("addCollaborator should throw IllegalArgumentException when requester is not the task creator")
+    void addCollaborator_ShouldThrowException_WhenRequesterIsNotCreator() {
+        Task task = Task.builder()
+            .id(defaultId)
+            .creatorId(defaultCreatorId)
+            .build();
+        Integer invalidRequesterId = 500;
+
+        when(repository.findById(defaultId)).thenReturn(Optional.of(task));
+
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> service.addCollaborator(defaultId, invalidRequesterId, defaultCollaboratorId)
+        );
+
+        assertEquals("Only the task creator can add collaborators.", exception.getMessage());
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("addCollaborator should throw IllegalArgumentException when trying to add the creator as a collaborator")
+    void addCollaborator_ShouldThrowException_WhenCollaboratorIsCreator() {
+        Task task = Task.builder()
+            .id(defaultId)
+            .creatorId(defaultCreatorId)
+            .build();
+
+        when(repository.findById(defaultId)).thenReturn(Optional.of(task));
+
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> service.addCollaborator(defaultId, defaultCreatorId, defaultCreatorId)
+        );
+
+        assertEquals("The creator of this task cannot be added as collaborator.", exception.getMessage());
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("removeCollaborator should detach collaborator entry when requester is creator")
+    void removeCollaborator_ShouldRemoveCollaborator_WhenValid() {
+        Task task = Task.builder()
+            .id(defaultId)
+            .creatorId(defaultCreatorId)
+            .build();
+
+        TaskCollaborator existingCollaborator = new TaskCollaborator(task, defaultCollaboratorId);
+        task.getCollaborators().add(existingCollaborator);
+
+        when(repository.findById(defaultId)).thenReturn(Optional.of(task));
+
+        service.removeCollaborator(defaultId,defaultCollaboratorId, defaultCreatorId);
+
+        assertTrue(task.getCollaborators().isEmpty());
+        verify(repository, times(1)).save(task);
+    }
+
+    @Test
+    @DisplayName("removeCollaborator should throw EntityNotFoundException when user is not an active collaborator")
+    void removeCollaborator_ShouldThrowException_WhenUserIsNotACollaborator() {
+        Task task = Task.builder()
+            .id(defaultId)
+            .creatorId(defaultCreatorId)
+            .build();
+
+        when(repository.findById(defaultId)).thenReturn(Optional.of(task));
+
+        EntityNotFoundException exception = assertThrows(
+            EntityNotFoundException.class,
+            () -> service.removeCollaborator(defaultId, defaultCollaboratorId, defaultCreatorId)
+        );
+
+        assertEquals("User is not a collaborator on this task.", exception.getMessage());
+        verify(repository, never()).save(any());
     }
 }
