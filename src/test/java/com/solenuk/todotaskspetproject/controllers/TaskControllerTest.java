@@ -130,7 +130,7 @@ class TaskControllerTest {
             null
         );
 
-        when(taskService.getTasksByCreatorId(defaultCreatorId)).thenReturn(List.of(responseDTO));
+        when(taskService.getTasksForUser(defaultCreatorId)).thenReturn(List.of(responseDTO));
 
         mockMvc.perform(get("/api/tasks/user/{userId}", defaultCreatorId))
             .andExpect(status().isOk())

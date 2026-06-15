@@ -134,7 +134,7 @@ class TaskServiceImplTest {
         when(repository.findAllByCreatorId(defaultCreatorId)).thenReturn(userTasks);
         when(mapper.toResponse(mockedEntity)).thenReturn(expectedResponse);
 
-        List<ResponseTaskDTO> actualResponse = service.getTasksByCreatorId(defaultCreatorId);
+        List<ResponseTaskDTO> actualResponse = service.getTasksForUser(defaultCreatorId);
 
         assertNotNull(actualResponse);
         assertEquals(1, actualResponse.size());
