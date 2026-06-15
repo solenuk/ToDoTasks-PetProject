@@ -4,6 +4,8 @@ import com.solenuk.todotaskspetproject.enums.TaskPriority;
 import com.solenuk.todotaskspetproject.enums.TaskState;
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -46,4 +48,8 @@ public class Task {
     @LastModifiedDate
     @Column(name = "updated_at")
     private Instant updatedAt;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TaskCollaborator> collaborators = new ArrayList<>();
 }
