@@ -29,7 +29,7 @@ public class TaskController {
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<ResponseTaskDTO>> getTasksByCreatorId(@PathVariable Integer userId) {
-        return ResponseEntity.ok(taskService.getTasksByCreatorId(userId));
+        return ResponseEntity.ok(taskService.getTasksForUser(userId));
     }
 
     @PostMapping

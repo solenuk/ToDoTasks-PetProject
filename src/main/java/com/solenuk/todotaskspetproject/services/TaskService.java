@@ -16,5 +16,9 @@ public interface TaskService {
 
     ResponseTaskDTO getTaskById(Integer id);
 
-    List<ResponseTaskDTO> getTasksByCreatorId(Integer id);
+    List<ResponseTaskDTO> getTasksForUser(Integer id);
+
+    void addCollaborator(Integer taskId, Integer collaboratorId, Integer requesterId);
+
+    void removeCollaborator(Integer taskId, Integer collaboratorId, Integer requesterId);
 }
