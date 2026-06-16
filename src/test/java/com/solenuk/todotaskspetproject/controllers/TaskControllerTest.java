@@ -182,7 +182,7 @@ class TaskControllerTest {
         Integer invalidRequesterId = 72;
 
         doThrow(new IllegalArgumentException("Only the task creator can add collaborators."))
-            .when(taskService).addCollaborator(defaultId, invalidRequesterId, defaultCollaboratorId);
+            .when(taskService).addCollaborator(defaultId, defaultCollaboratorId, invalidRequesterId);
 
         mockMvc.perform(post("/api/tasks/{taskId}/collaborators/{collaboratorId}", defaultId, defaultCollaboratorId)
                 .param("requesterId", invalidRequesterId.toString()))

@@ -53,8 +53,8 @@ public class TaskController {
 
     @PostMapping("/{taskId}/collaborators/{collaboratorId}")
     public ResponseEntity<Void> addCollaboratorToTask(@PathVariable Integer taskId,
-        @PathVariable Integer collaboratorId, @PathVariable Integer requestId) {
-        taskService.addCollaborator(taskId, collaboratorId, requestId);
+        @PathVariable Integer collaboratorId, @RequestParam Integer requesterId) {
+        taskService.addCollaborator(taskId, collaboratorId, requesterId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
