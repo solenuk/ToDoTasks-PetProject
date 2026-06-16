@@ -2,8 +2,7 @@ package com.solenuk.todotaskspetproject.controllers;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import com.solenuk.todotaskspetproject.dtos.request.CreateTaskDTO;
@@ -41,6 +40,7 @@ class TaskControllerTest {
     private final TaskPriority defaultPriority = TaskPriority.HIGH;
     private final TaskState defaultState = TaskState.NEW;
     private final Integer defaultCreatorId = 1;
+    private final Integer defaultCollaboratorId = 2;
 
     @Test
     @DisplayName("POST /api/tasks should return 201 Created and DTO when valid")
@@ -124,7 +124,7 @@ class TaskControllerTest {
 
     @Test
     @DisplayName("GET /api/tasks/user/{userId} should return 200 OK and user's tasks")
-    void getTasksByCreatorId_ShouldReturn200() throws Exception {
+    void getTasksForUser_ShouldReturn200() throws Exception {
         ResponseTaskDTO responseDTO = new ResponseTaskDTO(
             defaultId, defaultTitle, defaultDescription, defaultState, defaultPriority, defaultCreatorId, Instant.now(),
             null
@@ -174,5 +174,28 @@ class TaskControllerTest {
 
         mockMvc.perform(delete("/api/tasks/{id}", missingId))
             .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("POST /api/tasks/{taskId}/collaborators/{collaboratorId} should return 400 when unauthorized action occurs")
+    void addCollaborator_ShouldReturn400_WhenServiceThrowsIllegalArgument() throws Exception {
+        Integer invalidRequesterId = 72;
+
+        doThrow(new IllegalArgumentException("Only the task creator can add collaborators."))
+            .when(taskService).addCollaborator(defaultId, invalidRequesterId, defaultCollaboratorId);
+
+        mockMvc.perform(post("/api/tasks/{taskId}/collaborators/{collaboratorId}", defaultId, defaultCollaboratorId)
+                .param("requesterId", invalidRequesterId.toString()))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("DELETE /api/tasks/{taskId}/collaborators/{collaboratorId} should return 204 No Content")
+    void removeCollaborator_ShouldReturn204() throws Exception {
+        mockMvc.perform(delete("/api/tasks/{taskId}/collaborators/{collaboratorId}", defaultId, defaultCollaboratorId)
+                .param("requesterId", defaultCreatorId.toString()))
+            .andExpect(status().isNoContent());
+
+        verify(taskService, times(1)).removeCollaborator(defaultId, defaultCreatorId, defaultCollaboratorId);
     }
 }
