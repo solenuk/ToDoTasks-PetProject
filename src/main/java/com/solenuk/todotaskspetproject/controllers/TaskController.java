@@ -28,7 +28,7 @@ public class TaskController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<ResponseTaskDTO>> getTasksByCreatorId(@PathVariable Integer userId) {
+    public ResponseEntity<List<ResponseTaskDTO>> getTasksForUser(@PathVariable Integer userId) {
         return ResponseEntity.ok(taskService.getTasksForUser(userId));
     }
 
@@ -48,6 +48,20 @@ public class TaskController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTask(@PathVariable Integer id) {
         taskService.deleteTask(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{taskId}/collaborators/{collaboratorId}")
+    public ResponseEntity<Void> addCollaboratorToTask(@PathVariable Integer taskId,
+        @PathVariable Integer collaboratorId, @RequestParam Integer requesterId) {
+        taskService.addCollaborator(taskId, collaboratorId, requesterId);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @DeleteMapping("/{taskId}/collaborators/{collaboratorId}")
+    public ResponseEntity<Void> removeCollaborator(@PathVariable Integer taskId,
+        @PathVariable Integer collaboratorId, @RequestParam Integer requesterId) {
+        taskService.removeCollaborator(taskId, requesterId, collaboratorId);
         return ResponseEntity.noContent().build();
     }
 }
