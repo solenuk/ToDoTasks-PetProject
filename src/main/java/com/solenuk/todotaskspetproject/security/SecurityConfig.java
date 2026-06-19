@@ -18,7 +18,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationProvider authenticationProvider;
 
-    private static final String[] WHITE_LIST = {"/api/auth"};
+    private static final String[] WHITE_LIST = {"/api/auth/**"};
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
