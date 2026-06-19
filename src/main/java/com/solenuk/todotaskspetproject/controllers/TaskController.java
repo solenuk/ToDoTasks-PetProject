@@ -3,12 +3,14 @@ package com.solenuk.todotaskspetproject.controllers;
 import com.solenuk.todotaskspetproject.dtos.request.CreateTaskDTO;
 import com.solenuk.todotaskspetproject.dtos.request.UpdateTaskDTO;
 import com.solenuk.todotaskspetproject.dtos.response.ResponseTaskDTO;
+import com.solenuk.todotaskspetproject.entities.User;
 import com.solenuk.todotaskspetproject.services.TaskService;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class TaskController {
     private final TaskService taskService;
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<ResponseTaskDTO>> getAllTasks() {
         return ResponseEntity.ok(taskService.getAllTasks());
     }
@@ -27,9 +29,9 @@ public class TaskController {
         return ResponseEntity.ok(taskService.getTaskById(id));
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<ResponseTaskDTO>> getTasksForUser(@PathVariable Integer userId) {
-        return ResponseEntity.ok(taskService.getTasksForUser(userId));
+    @GetMapping
+    public ResponseEntity<List<ResponseTaskDTO>> getTasksForUser(@AuthenticationPrincipal User currentUser) {
+        return ResponseEntity.ok(taskService.getTasksForUser(currentUser.getId()));
     }
 
     @PostMapping
@@ -53,15 +55,15 @@ public class TaskController {
 
     @PostMapping("/{taskId}/collaborators/{collaboratorId}")
     public ResponseEntity<Void> addCollaboratorToTask(@PathVariable Integer taskId,
-        @PathVariable Integer collaboratorId, @RequestParam Integer requesterId) {
-        taskService.addCollaborator(taskId, collaboratorId, requesterId);
+        @PathVariable Integer collaboratorId, @AuthenticationPrincipal User requester) {
+        taskService.addCollaborator(taskId, collaboratorId, requester.getId());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @DeleteMapping("/{taskId}/collaborators/{collaboratorId}")
     public ResponseEntity<Void> removeCollaborator(@PathVariable Integer taskId,
-        @PathVariable Integer collaboratorId, @RequestParam Integer requesterId) {
-        taskService.removeCollaborator(taskId, requesterId, collaboratorId);
+        @PathVariable Integer collaboratorId, @AuthenticationPrincipal User requester) {
+        taskService.removeCollaborator(taskId, collaboratorId, requester.getId());
         return ResponseEntity.noContent().build();
     }
 }
