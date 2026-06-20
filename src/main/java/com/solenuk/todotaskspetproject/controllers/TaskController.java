@@ -2,12 +2,13 @@ package com.solenuk.todotaskspetproject.controllers;
 
 import com.solenuk.todotaskspetproject.dtos.request.CreateTaskDTO;
 import com.solenuk.todotaskspetproject.dtos.request.UpdateTaskDTO;
+import com.solenuk.todotaskspetproject.dtos.response.PaginatedResponseDTO;
 import com.solenuk.todotaskspetproject.dtos.response.ResponseTaskDTO;
 import com.solenuk.todotaskspetproject.entities.User;
 import com.solenuk.todotaskspetproject.services.TaskService;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,8 +21,8 @@ public class TaskController {
     private final TaskService taskService;
 
     @GetMapping("/all")
-    public ResponseEntity<List<ResponseTaskDTO>> getAllTasks() {
-        return ResponseEntity.ok(taskService.getAllTasks());
+    public ResponseEntity<PaginatedResponseDTO<ResponseTaskDTO>> getAllTasks(Pageable pageable) {
+        return ResponseEntity.ok(taskService.getAllTasks(pageable));
     }
 
     @GetMapping("/{id}")
@@ -30,8 +31,9 @@ public class TaskController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ResponseTaskDTO>> getTasksForUser(@AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(taskService.getTasksForUser(currentUser.getId()));
+    public ResponseEntity<PaginatedResponseDTO<ResponseTaskDTO>> getTasksForUser(
+        @AuthenticationPrincipal User currentUser, Pageable pageable) {
+        return ResponseEntity.ok(taskService.getTasksForUser(currentUser.getId(), pageable));
     }
 
     @PostMapping
