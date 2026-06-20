@@ -2,15 +2,19 @@ package com.solenuk.todotaskspetproject.services.impl;
 
 import com.solenuk.todotaskspetproject.dtos.request.CreateTaskDTO;
 import com.solenuk.todotaskspetproject.dtos.request.UpdateTaskDTO;
+import com.solenuk.todotaskspetproject.dtos.response.PaginatedResponseDTO;
 import com.solenuk.todotaskspetproject.dtos.response.ResponseTaskDTO;
 import com.solenuk.todotaskspetproject.entities.Task;
 import com.solenuk.todotaskspetproject.entities.TaskCollaborator;
+import com.solenuk.todotaskspetproject.mappers.PaginationMapper;
 import com.solenuk.todotaskspetproject.mappers.TaskMapper;
 import com.solenuk.todotaskspetproject.repositories.TaskRepository;
 import com.solenuk.todotaskspetproject.services.TaskService;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
     private final TaskMapper taskMapper;
+    private final PaginationMapper paginationMapper;
 
     @Override
     @Transactional
@@ -56,10 +61,9 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ResponseTaskDTO> getAllTasks() {
-        return taskRepository.findAll().stream()
-            .map(taskMapper::toResponse)
-            .toList();
+    public PaginatedResponseDTO<ResponseTaskDTO> getAllTasks(Pageable pageable) {
+        Page<Task> taskPage = taskRepository.findAll(pageable);
+        return paginationMapper.mapToPaginatedResponse(taskPage, taskMapper::toResponse);
     }
 
     @Override
@@ -72,10 +76,9 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ResponseTaskDTO> getTasksForUser(Integer userId) {
-        return taskRepository.findAllTasksForUser(userId).stream()
-            .map(taskMapper::toResponse)
-            .toList();
+    public PaginatedResponseDTO<ResponseTaskDTO> getTasksForUser(Integer userId, Pageable pageable) {
+        Page<Task> taskPage = taskRepository.findAllTasksForUser(userId, pageable);
+        return paginationMapper.mapToPaginatedResponse(taskPage, taskMapper::toResponse);
     }
 
     @Override
