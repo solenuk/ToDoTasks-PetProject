@@ -13,9 +13,6 @@ public record CreateTaskDTO(
     String description,
 
     @NotNull(message = "Priority is required")
-    TaskPriority priority,
-
-    @NotNull(message = "Creator ID is required")
-    Integer creatorId
+    TaskPriority priority
 ) {
 }

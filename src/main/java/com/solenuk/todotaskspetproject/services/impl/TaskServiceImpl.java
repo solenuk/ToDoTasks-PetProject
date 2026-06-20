@@ -26,10 +26,9 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
-    public ResponseTaskDTO createTask(CreateTaskDTO createTaskRequest) {
-        // Once JWT authentication is added, this ID will be securely extracted from the token,
-        // guaranteeing the user exists
+    public ResponseTaskDTO createTask(CreateTaskDTO createTaskRequest, Integer creatorId) {
         Task task = taskMapper.toEntity(createTaskRequest);
+        task.setCreatorId(creatorId);
         Task createdTask = taskRepository.save(task);
         return taskMapper.toResponse(createdTask);
     }
