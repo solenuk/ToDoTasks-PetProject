@@ -14,7 +14,6 @@ public class TaskMapper {
             .description(createTaskRequest.description())
             .priority(createTaskRequest.priority())
             .state(TaskState.NEW)
-            .creatorId(createTaskRequest.creatorId())
             .build();
     }
 

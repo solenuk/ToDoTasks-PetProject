@@ -17,7 +17,7 @@ public class PaginationMapper {
      * @param <R>            The DTO type (e.g., ResponseTaskDTO, UserDTO).
      * @return A clean PaginatedResponse containing the mapped DTOs.
      */
-    public <T, R> PaginatedResponseDTO<R> mapToPaginatedResponse(Page<T> page, Function<T,R> mapperFunction){
+    public <T, R> PaginatedResponseDTO<R> mapToPaginatedResponse(Page<T> page, Function<T, R> mapperFunction) {
         List<R> content = page.getContent().stream()
             .map(mapperFunction)
             .toList();
