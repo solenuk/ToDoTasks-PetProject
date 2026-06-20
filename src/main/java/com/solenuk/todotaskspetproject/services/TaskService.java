@@ -4,6 +4,7 @@ import com.solenuk.todotaskspetproject.dtos.request.CreateTaskDTO;
 import com.solenuk.todotaskspetproject.dtos.request.UpdateTaskDTO;
 import com.solenuk.todotaskspetproject.dtos.response.PaginatedResponseDTO;
 import com.solenuk.todotaskspetproject.dtos.response.ResponseTaskDTO;
+import java.util.List;
 import org.springframework.data.domain.Pageable;
 
 public interface TaskService {
