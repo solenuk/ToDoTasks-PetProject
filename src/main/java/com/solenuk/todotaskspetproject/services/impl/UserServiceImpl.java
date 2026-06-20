@@ -2,15 +2,18 @@ package com.solenuk.todotaskspetproject.services.impl;
 
 import com.solenuk.todotaskspetproject.dtos.request.CreateUserDTO;
 import com.solenuk.todotaskspetproject.dtos.request.UpdateUserDTO;
+import com.solenuk.todotaskspetproject.dtos.response.PaginatedResponseDTO;
 import com.solenuk.todotaskspetproject.dtos.response.ResponseUserDTO;
 import com.solenuk.todotaskspetproject.entities.User;
+import com.solenuk.todotaskspetproject.mappers.PaginationMapper;
 import com.solenuk.todotaskspetproject.mappers.UserMapper;
 import com.solenuk.todotaskspetproject.repositories.UserRepository;
 import com.solenuk.todotaskspetproject.services.UserService;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +24,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final PaginationMapper paginationMapper;
 
     @Override
     @Transactional
@@ -67,8 +71,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ResponseUserDTO> getAllUsers() {
-        return userRepository.findAll().stream().map(userMapper::toResponse).toList();
+    public PaginatedResponseDTO<ResponseUserDTO> getAllUsers(Pageable pageable) {
+        Page<User> userPage = userRepository.findAll(pageable);
+        return paginationMapper.mapToPaginatedResponse(userPage, userMapper::toResponse);
     }
 
     @Override
