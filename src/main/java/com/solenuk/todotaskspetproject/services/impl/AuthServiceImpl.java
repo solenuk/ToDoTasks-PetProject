@@ -3,7 +3,6 @@ package com.solenuk.todotaskspetproject.services.impl;
 import com.solenuk.todotaskspetproject.dtos.request.AuthRequestDTO;
 import com.solenuk.todotaskspetproject.dtos.request.CreateUserDTO;
 import com.solenuk.todotaskspetproject.dtos.response.AuthResponseDTO;
-import com.solenuk.todotaskspetproject.dtos.response.ResponseUserDTO;
 import com.solenuk.todotaskspetproject.entities.User;
 import com.solenuk.todotaskspetproject.mappers.UserMapper;
 import com.solenuk.todotaskspetproject.repositories.UserRepository;
