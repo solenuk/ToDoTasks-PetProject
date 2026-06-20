@@ -1,7 +1,8 @@
 package com.solenuk.todotaskspetproject.repositories;
 
 import com.solenuk.todotaskspetproject.entities.Task;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,12 +11,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Integer> {
     /**
-     * Retrieves a list of Tasks created by user.
+     * Retrieves a list paginated of Tasks created by user.
      *
      * @param creatorId the id of a user to search for; must not be null
-     * @return a list of Tasks
+     * @param pageable  pagination information
+     * @return a Page of Tasks
      */
-    List<Task> findAllByCreatorId(Integer creatorId);
+    Page<Task> findAllByCreatorId(Integer creatorId, Pageable pageable);
 
     /**
      * Checks whether a user by given id created any tasks.
@@ -26,19 +28,20 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
     boolean existsByCreatorId(Integer creatorId);
 
     /**
-     * Retrieves all tasks that a user has access to, either as the creator or as a collaborator.
+     * Retrieves a paginated list of tasks that a user has access to, either as the creator or as a collaborator.
      *
-     * @param userId the id of the user; must not be null
-     * @return a list of Tasks accessible by the user
+     * @param userId   the id of the user; must not be null
+     * @param pageable pagination information
+     * @return a Page of Tasks accessible by the user
      */
     @Query(
         "SELECT DISTINCT t FROM Task t LEFT JOIN t.collaborators tc WHERE t.creatorId = :userId OR tc.id.userId = "
             + ":userId")
-    List<Task> findAllTasksForUser(@Param("userId") Integer userId);
+    Page<Task> findAllTasksForUser(@Param("userId") Integer userId, Pageable pageable);
 
     /**
-     * Checks whether a user has access to a specific task, i.e., the user is either the creator
-     * or a collaborator of that task.
+     * Checks whether a user has access to a specific task, i.e., the user is either the creator or a collaborator of
+     * that task.
      *
      * @param taskId the id of the task to check; must not be null
      * @param userId the id of the user to verify access for; must not be null
