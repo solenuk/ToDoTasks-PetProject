@@ -2,11 +2,12 @@ package com.solenuk.todotaskspetproject.controllers;
 
 import com.solenuk.todotaskspetproject.dtos.request.CreateUserDTO;
 import com.solenuk.todotaskspetproject.dtos.request.UpdateUserDTO;
+import com.solenuk.todotaskspetproject.dtos.response.PaginatedResponseDTO;
 import com.solenuk.todotaskspetproject.dtos.response.ResponseUserDTO;
 import com.solenuk.todotaskspetproject.services.UserService;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,8 +19,8 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<List<ResponseUserDTO>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+    public ResponseEntity<PaginatedResponseDTO<ResponseUserDTO>> getAllUsers(Pageable pageable) {
+        return ResponseEntity.ok(userService.getAllUsers(pageable));
     }
 
     @GetMapping("/{id}")
