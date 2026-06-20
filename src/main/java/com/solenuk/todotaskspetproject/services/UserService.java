@@ -2,8 +2,9 @@ package com.solenuk.todotaskspetproject.services;
 
 import com.solenuk.todotaskspetproject.dtos.request.CreateUserDTO;
 import com.solenuk.todotaskspetproject.dtos.request.UpdateUserDTO;
+import com.solenuk.todotaskspetproject.dtos.response.PaginatedResponseDTO;
 import com.solenuk.todotaskspetproject.dtos.response.ResponseUserDTO;
-import java.util.List;
+import org.springframework.data.domain.Pageable;
 
 public interface UserService {
     ResponseUserDTO createUser(CreateUserDTO createUserRequest);
@@ -12,7 +13,7 @@ public interface UserService {
 
     void deleteUser(Integer id);
 
-    List<ResponseUserDTO> getAllUsers();
+    public PaginatedResponseDTO<ResponseUserDTO> getAllUsers(Pageable pageable);
 
     ResponseUserDTO getUserById(Integer id);
 

@@ -11,7 +11,6 @@ import com.solenuk.todotaskspetproject.mappers.TaskMapper;
 import com.solenuk.todotaskspetproject.repositories.TaskRepository;
 import com.solenuk.todotaskspetproject.services.TaskService;
 import jakarta.persistence.EntityNotFoundException;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
