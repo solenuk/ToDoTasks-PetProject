@@ -3,7 +3,9 @@ package com.solenuk.todotaskspetproject.services.impl;
 import com.solenuk.todotaskspetproject.dtos.request.AuthRequestDTO;
 import com.solenuk.todotaskspetproject.dtos.request.CreateUserDTO;
 import com.solenuk.todotaskspetproject.dtos.response.AuthResponseDTO;
+import com.solenuk.todotaskspetproject.dtos.response.ResponseUserDTO;
 import com.solenuk.todotaskspetproject.entities.User;
+import com.solenuk.todotaskspetproject.mappers.UserMapper;
 import com.solenuk.todotaskspetproject.repositories.UserRepository;
 import com.solenuk.todotaskspetproject.services.AuthService;
 import com.solenuk.todotaskspetproject.services.JwtService;
@@ -21,6 +23,7 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     @Override
     public AuthResponseDTO register(CreateUserDTO request) {
@@ -30,7 +33,7 @@ public class AuthServiceImpl implements AuthService {
             .orElseThrow(() -> new EntityNotFoundException("User not found after creation."));
 
         String jwtToken = jwtService.generateToken(savedUser);
-        return new AuthResponseDTO(jwtToken);
+        return new AuthResponseDTO(jwtToken, userMapper.toResponse(savedUser));
     }
 
     @Override
@@ -46,6 +49,6 @@ public class AuthServiceImpl implements AuthService {
             .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + request.email()));
 
         String jwtToken = jwtService.generateToken(user);
-        return new AuthResponseDTO(jwtToken);
+        return new AuthResponseDTO(jwtToken, userMapper.toResponse(user));
     }
 }
