@@ -12,6 +12,7 @@ import com.solenuk.todotaskspetproject.repositories.TaskRepository;
 import com.solenuk.todotaskspetproject.services.TaskService;
 import jakarta.persistence.EntityNotFoundException;
 import java.nio.file.AccessDeniedException;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -64,7 +65,11 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional(readOnly = true)
-    public PaginatedResponseDTO<ResponseTaskDTO> getAllTasks(Pageable pageable) {
+    public PaginatedResponseDTO<ResponseTaskDTO> getAllTasks(Pageable pageable, String userRole)
+        throws AccessDeniedException {
+        if (userRole.equals("ADMIN_ROLE")) {
+            throw new AccessDeniedException("Only administrators can view the global task list.");
+        }
         Page<Task> taskPage = taskRepository.findAll(pageable);
         return paginationMapper.mapToPaginatedResponse(taskPage, taskMapper::toResponse);
     }
@@ -109,6 +114,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional
     public void removeCollaborator(Integer taskId, Integer collaboratorId, Integer requesterId) {
         Task task = taskRepository.findById(taskId)
             .orElseThrow(() -> new EntityNotFoundException("Task not found with id: " + taskId));

@@ -22,8 +22,9 @@ public class TaskController {
     private final TaskService taskService;
 
     @GetMapping("/all")
-    public ResponseEntity<PaginatedResponseDTO<ResponseTaskDTO>> getAllTasks(Pageable pageable) {
-        return ResponseEntity.ok(taskService.getAllTasks(pageable));
+    public ResponseEntity<PaginatedResponseDTO<ResponseTaskDTO>> getAllTasks(Pageable pageable,
+        @AuthenticationPrincipal User currentUser) throws AccessDeniedException {
+        return ResponseEntity.ok(taskService.getAllTasks(pageable, currentUser.getRole().name()));
     }
 
     @GetMapping("/{id}")
