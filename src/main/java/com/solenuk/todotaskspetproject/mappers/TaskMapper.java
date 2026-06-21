@@ -3,7 +3,9 @@ package com.solenuk.todotaskspetproject.mappers;
 import com.solenuk.todotaskspetproject.dtos.request.CreateTaskDTO;
 import com.solenuk.todotaskspetproject.dtos.response.ResponseTaskDTO;
 import com.solenuk.todotaskspetproject.entities.Task;
+import com.solenuk.todotaskspetproject.entities.TaskCollaborator;
 import com.solenuk.todotaskspetproject.enums.TaskState;
+import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,6 +20,12 @@ public class TaskMapper {
     }
 
     public ResponseTaskDTO toResponse(Task task) {
+        List<Integer> collaboratorIds = task.getCollaborators() != null
+            ? task.getCollaborators().stream()
+            .map(TaskCollaborator::getUserId)
+            .toList()
+            : List.of();
+
         return new ResponseTaskDTO(
             task.getId(),
             task.getTitle(),
@@ -26,7 +34,8 @@ public class TaskMapper {
             task.getPriority(),
             task.getCreatorId(),
             task.getCreatedAt(),
-            task.getUpdatedAt()
+            task.getUpdatedAt(),
+            collaboratorIds
         );
     }
 }
