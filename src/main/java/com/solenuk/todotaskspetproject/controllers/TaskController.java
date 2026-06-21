@@ -7,6 +7,7 @@ import com.solenuk.todotaskspetproject.dtos.response.ResponseTaskDTO;
 import com.solenuk.todotaskspetproject.entities.User;
 import com.solenuk.todotaskspetproject.services.TaskService;
 import jakarta.validation.Valid;
+import java.nio.file.AccessDeniedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -46,13 +47,16 @@ public class TaskController {
     @PutMapping("/{id}")
     public ResponseEntity<ResponseTaskDTO> updateTask(
         @PathVariable Integer id,
-        @Valid @RequestBody UpdateTaskDTO request) {
-        return ResponseEntity.ok(taskService.updateTask(id, request));
+        @Valid @RequestBody UpdateTaskDTO request,
+        @AuthenticationPrincipal User currentUser) throws AccessDeniedException {
+        return ResponseEntity.ok(
+            taskService.updateTask(id, request, currentUser.getId(), currentUser.getRole().name()));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTask(@PathVariable Integer id) {
-        taskService.deleteTask(id);
+    public ResponseEntity<Void> deleteTask(@PathVariable Integer id, @AuthenticationPrincipal User currentUser)
+        throws AccessDeniedException {
+        taskService.deleteTask(id, currentUser.getId(), currentUser.getRole().name());
         return ResponseEntity.noContent().build();
     }
 

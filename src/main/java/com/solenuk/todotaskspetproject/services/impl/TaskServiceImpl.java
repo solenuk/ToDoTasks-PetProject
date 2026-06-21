@@ -11,6 +11,7 @@ import com.solenuk.todotaskspetproject.mappers.TaskMapper;
 import com.solenuk.todotaskspetproject.repositories.TaskRepository;
 import com.solenuk.todotaskspetproject.services.TaskService;
 import jakarta.persistence.EntityNotFoundException;
+import java.nio.file.AccessDeniedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,9 +36,17 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
-    public ResponseTaskDTO updateTask(Integer id, UpdateTaskDTO updateTaskRequest) {
-        Task existingTask = taskRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Task not found with id: " + id));
+    public ResponseTaskDTO updateTask(Integer taskId, UpdateTaskDTO updateTaskRequest, Integer requesterId,
+        String userRole) throws AccessDeniedException {
+        Task existingTask = taskRepository.findById(taskId)
+            .orElseThrow(() -> new EntityNotFoundException("Task not found with id: " + taskId));
+
+        boolean isCreator = existingTask.getCreatorId().equals(requesterId);
+        boolean isAdmin = userRole.equals("ADMIN_ROLE");
+
+        if (!isCreator && !isAdmin) {
+            throw new AccessDeniedException("You do not have permission to delete this task.");
+        }
 
         existingTask.setTitle(updateTaskRequest.title());
         existingTask.setDescription(updateTaskRequest.description());
@@ -50,11 +59,16 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
-    public void deleteTask(Integer id) {
-        if (!taskRepository.existsById(id)) {
-            throw new EntityNotFoundException("Task not found with ID: " + id);
+    public void deleteTask(Integer taskId, Integer requesterId, String userRole) throws AccessDeniedException {
+        Task task = taskRepository.findById(taskId)
+            .orElseThrow(() -> new EntityNotFoundException("Task not found with id: " + taskId));
+        boolean isCreator = task.getCreatorId().equals(requesterId);
+        boolean isAdmin = userRole.equals("ADMIN_ROLE");
+        if (!isCreator && !isAdmin) {
+            throw new AccessDeniedException("You do not have permission to delete this task.");
         }
-        taskRepository.deleteById(id);
+
+        taskRepository.delete(task);
     }
 
     @Override
