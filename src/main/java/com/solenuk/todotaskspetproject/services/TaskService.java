@@ -15,7 +15,8 @@ public interface TaskService {
 
     void deleteTask(Integer taskId, Integer requesterId, String userRole) throws AccessDeniedException;
 
-    PaginatedResponseDTO<ResponseTaskDTO> getAllTasks(Pageable pageable);
+    PaginatedResponseDTO<ResponseTaskDTO> getAllTasks(Pageable pageable, String userRole)
+        throws AccessDeniedException;
 
     ResponseTaskDTO getTaskById(Integer id);
 
