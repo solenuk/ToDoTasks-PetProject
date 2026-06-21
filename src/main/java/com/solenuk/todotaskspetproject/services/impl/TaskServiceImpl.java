@@ -41,12 +41,7 @@ public class TaskServiceImpl implements TaskService {
         Task existingTask = taskRepository.findById(taskId)
             .orElseThrow(() -> new EntityNotFoundException("Task not found with id: " + taskId));
 
-        boolean isCreator = existingTask.getCreatorId().equals(requesterId);
-        boolean isAdmin = userRole.equals("ADMIN_ROLE");
-
-        if (!isCreator && !isAdmin) {
-            throw new AccessDeniedException("You do not have permission to delete this task.");
-        }
+        verifyUserPermission(requesterId, userRole, existingTask);
 
         existingTask.setTitle(updateTaskRequest.title());
         existingTask.setDescription(updateTaskRequest.description());
@@ -62,11 +57,7 @@ public class TaskServiceImpl implements TaskService {
     public void deleteTask(Integer taskId, Integer requesterId, String userRole) throws AccessDeniedException {
         Task task = taskRepository.findById(taskId)
             .orElseThrow(() -> new EntityNotFoundException("Task not found with id: " + taskId));
-        boolean isCreator = task.getCreatorId().equals(requesterId);
-        boolean isAdmin = userRole.equals("ADMIN_ROLE");
-        if (!isCreator && !isAdmin) {
-            throw new AccessDeniedException("You do not have permission to delete this task.");
-        }
+        verifyUserPermission(requesterId, userRole, task);
 
         taskRepository.delete(task);
     }
@@ -132,6 +123,16 @@ public class TaskServiceImpl implements TaskService {
             taskRepository.save(task);
         } else {
             throw new EntityNotFoundException("User is not a collaborator on this task.");
+        }
+    }
+
+    private static void verifyUserPermission(Integer requesterId, String userRole, Task existingTask)
+        throws AccessDeniedException {
+        boolean isCreator = existingTask.getCreatorId().equals(requesterId);
+        boolean isAdmin = userRole.equals("ADMIN_ROLE");
+
+        if (!isCreator && !isAdmin) {
+            throw new AccessDeniedException("You do not have permission to delete this task.");
         }
     }
 }

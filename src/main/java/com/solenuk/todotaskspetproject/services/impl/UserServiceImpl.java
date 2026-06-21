@@ -11,6 +11,7 @@ import com.solenuk.todotaskspetproject.repositories.UserRepository;
 import com.solenuk.todotaskspetproject.services.UserService;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import java.nio.file.AccessDeniedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,7 +43,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public ResponseUserDTO updateUser(Integer id, UpdateUserDTO updateUserRequest) {
+    public ResponseUserDTO updateUser(Integer id, UpdateUserDTO updateUserRequest, User currentUser)
+        throws AccessDeniedException {
+        verifyUserPermissions(id, currentUser);
         User existingUser = userRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
 
@@ -62,7 +65,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void deleteUser(Integer id) {
+    public void deleteUser(Integer id, User currentUser) throws AccessDeniedException {
+        verifyUserPermissions(id, currentUser);
         if (!userRepository.existsById(id)) {
             throw new EntityNotFoundException("User not found with id: " + id);
         }
@@ -90,5 +94,14 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
         return userMapper.toResponse(user);
+    }
+
+    private void verifyUserPermissions(Integer targetUserId, User currentUser) throws AccessDeniedException {
+        boolean isSelf = currentUser.getId().equals(targetUserId);
+        boolean isAdmin = currentUser.getRole().name().equals("ADMIN_ROLE");
+
+        if (!isSelf && !isAdmin) {
+            throw new AccessDeniedException("You do not have permission to modify this user account.");
+        }
     }
 }
