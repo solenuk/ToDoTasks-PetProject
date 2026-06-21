@@ -7,6 +7,7 @@ import com.solenuk.todotaskspetproject.dtos.response.ResponseUserDTO;
 import com.solenuk.todotaskspetproject.entities.User;
 import com.solenuk.todotaskspetproject.services.UserService;
 import jakarta.validation.Valid;
+import java.nio.file.AccessDeniedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -48,13 +49,15 @@ public class UserController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ResponseUserDTO> updateUser(@PathVariable Integer id, @Valid @RequestBody
-        UpdateUserDTO updateUserRequest) {
-        return ResponseEntity.ok(userService.updateUser(id, updateUserRequest));
+        UpdateUserDTO updateUserRequest,
+        @AuthenticationPrincipal User currentUser) throws AccessDeniedException {
+        return ResponseEntity.ok(userService.updateUser(id, updateUserRequest, currentUser));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ResponseUserDTO> deleteUser(@PathVariable Integer id) {
-        userService.deleteUser(id);
+    public ResponseEntity<Void> deleteUser(@PathVariable Integer id,
+        @AuthenticationPrincipal User currentUser) throws AccessDeniedException {
+        userService.deleteUser(id, currentUser);
         return ResponseEntity.noContent().build();
     }
 }
