@@ -66,7 +66,7 @@ public class TaskServiceImpl implements TaskService {
     @Transactional(readOnly = true)
     public PaginatedResponseDTO<ResponseTaskDTO> getAllTasks(Pageable pageable, String userRole)
         throws AccessDeniedException {
-        if (userRole.equals("ADMIN_ROLE")) {
+        if (!userRole.equals("ADMIN_ROLE")) {
             throw new AccessDeniedException("Only administrators can view the global task list.");
         }
         Page<Task> taskPage = taskRepository.findAll(pageable);
