@@ -3,6 +3,7 @@ package com.solenuk.todotaskspetproject.exceptions;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import java.nio.file.AccessDeniedException;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
@@ -49,12 +50,17 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ExpiredJwtException.class)
-    public ResponseEntity<Map<String, String>> handleExpiredJwtException(ExpiredJwtException ex) {
+    public ResponseEntity<Map<String, String>> handleExpiredJwtException(ExpiredJwtException exception) {
         return ResponseEntity
             .status(HttpStatus.UNAUTHORIZED)
             .body(Map.of(
                 "error", "Unauthorized",
                 "message", "JWT token has expired. Please log in again."
             ));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<String> handleAccessDeniedException(AccessDeniedException exception) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exception.getMessage());
     }
 }
