@@ -1,11 +1,11 @@
 package com.solenuk.todotaskspetproject.user.controllers;
 
 import com.solenuk.todotaskspetproject.common.dtos.response.PaginatedResponseDTO;
+import com.solenuk.todotaskspetproject.common.enteties.SecurityUser;
 import com.solenuk.todotaskspetproject.user.services.interfaces.UserService;
 import com.solenuk.todotaskspetproject.user.dtos.request.CreateUserDTO;
 import com.solenuk.todotaskspetproject.user.dtos.request.UpdateUserDTO;
 import com.solenuk.todotaskspetproject.user.dtos.response.ResponseUserDTO;
-import com.solenuk.todotaskspetproject.user.entities.User;
 import jakarta.validation.Valid;
 import java.nio.file.AccessDeniedException;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +27,8 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ResponseUserDTO> getCurrentUser(@AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(userService.getUserById(currentUser.getId()));
+    public ResponseEntity<ResponseUserDTO> getCurrentUser(@AuthenticationPrincipal SecurityUser currentUser) {
+        return ResponseEntity.ok(userService.getUserById(currentUser.id()));
     }
 
     @GetMapping("/{id}")
@@ -50,13 +50,13 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<ResponseUserDTO> updateUser(@PathVariable Integer id, @Valid @RequestBody
         UpdateUserDTO updateUserRequest,
-        @AuthenticationPrincipal User currentUser) throws AccessDeniedException {
+        @AuthenticationPrincipal SecurityUser currentUser) throws AccessDeniedException {
         return ResponseEntity.ok(userService.updateUser(id, updateUserRequest, currentUser));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Integer id,
-        @AuthenticationPrincipal User currentUser) throws AccessDeniedException {
+        @AuthenticationPrincipal SecurityUser currentUser) throws AccessDeniedException {
         userService.deleteUser(id, currentUser);
         return ResponseEntity.noContent().build();
     }
