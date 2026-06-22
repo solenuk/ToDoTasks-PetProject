@@ -5,14 +5,13 @@ import com.solenuk.todotaskspetproject.auth.dtos.response.AuthResponseDTO;
 import com.solenuk.todotaskspetproject.auth.services.interfaces.AuthService;
 import com.solenuk.todotaskspetproject.auth.services.interfaces.JwtService;
 import com.solenuk.todotaskspetproject.user.dtos.request.CreateUserDTO;
-import com.solenuk.todotaskspetproject.user.entities.User;
-import com.solenuk.todotaskspetproject.user.mappers.UserMapper;
-import com.solenuk.todotaskspetproject.user.repositories.UserRepository;
+import com.solenuk.todotaskspetproject.user.dtos.response.ResponseUserDTO;
 import com.solenuk.todotaskspetproject.user.services.interfaces.UserService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,18 +20,15 @@ public class AuthServiceImpl implements AuthService {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
-    private final UserRepository userRepository;
-    private final UserMapper userMapper;
+    private final UserDetailsService userDetailsService;
 
     @Override
     public AuthResponseDTO register(CreateUserDTO request) {
-        userService.createUser(request);
+        ResponseUserDTO created = userService.createUser(request);
 
-        User savedUser = userRepository.findByEmail(request.email())
-            .orElseThrow(() -> new EntityNotFoundException("User not found after creation."));
-
-        String jwtToken = jwtService.generateToken(savedUser);
-        return new AuthResponseDTO(jwtToken, userMapper.toResponse(savedUser));
+        UserDetails principal = userDetailsService.loadUserByUsername(created.email());
+        String jwtToken = jwtService.generateToken(principal);
+        return new AuthResponseDTO(jwtToken, created);
     }
 
     @Override
@@ -44,10 +40,9 @@ public class AuthServiceImpl implements AuthService {
             )
         );
 
-        User user = userRepository.findByEmail(request.email())
-            .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + request.email()));
-
-        String jwtToken = jwtService.generateToken(user);
-        return new AuthResponseDTO(jwtToken, userMapper.toResponse(user));
+        ResponseUserDTO user = userService.getUserByEmail(request.email());
+        UserDetails principal = userDetailsService.loadUserByUsername(request.email());
+        String token = jwtService.generateToken(principal);
+        return new AuthResponseDTO(token, user);
     }
 }
