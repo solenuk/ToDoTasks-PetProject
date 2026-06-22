@@ -1,6 +1,7 @@
 package com.solenuk.todotaskspetproject.user.services;
 
 import com.solenuk.todotaskspetproject.common.dtos.response.PaginatedResponseDTO;
+import com.solenuk.todotaskspetproject.common.enteties.SecurityUser;
 import com.solenuk.todotaskspetproject.common.mappers.PaginationMapper;
 import com.solenuk.todotaskspetproject.user.dtos.request.CreateUserDTO;
 import com.solenuk.todotaskspetproject.user.dtos.request.UpdateUserDTO;
@@ -43,7 +44,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public ResponseUserDTO updateUser(Integer id, UpdateUserDTO updateUserRequest, User currentUser)
+    public ResponseUserDTO updateUser(Integer id, UpdateUserDTO updateUserRequest, SecurityUser currentUser)
         throws AccessDeniedException {
         verifyUserPermissions(id, currentUser);
         User existingUser = userRepository.findById(id)
@@ -65,7 +66,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void deleteUser(Integer id, User currentUser) throws AccessDeniedException {
+    public void deleteUser(Integer id, SecurityUser currentUser) throws AccessDeniedException {
         verifyUserPermissions(id, currentUser);
         if (!userRepository.existsById(id)) {
             throw new EntityNotFoundException("User not found with id: " + id);
@@ -96,9 +97,9 @@ public class UserServiceImpl implements UserService {
         return userMapper.toResponse(user);
     }
 
-    private void verifyUserPermissions(Integer targetUserId, User currentUser) throws AccessDeniedException {
-        boolean isSelf = currentUser.getId().equals(targetUserId);
-        boolean isAdmin = currentUser.getRole().name().equals("ADMIN_ROLE");
+    private void verifyUserPermissions(Integer targetUserId, SecurityUser currentUser) throws AccessDeniedException {
+        boolean isSelf = currentUser.id().equals(targetUserId);
+        boolean isAdmin = currentUser.getAuthorities().iterator().next().getAuthority().equals("ADMIN_ROLE");
 
         if (!isSelf && !isAdmin) {
             throw new AccessDeniedException("You do not have permission to modify this user account.");
