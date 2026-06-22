@@ -7,7 +7,9 @@ import com.solenuk.todotaskspetproject.user.dtos.request.UpdateUserDTO;
 import com.solenuk.todotaskspetproject.user.dtos.response.ResponseUserDTO;
 import java.nio.file.AccessDeniedException;
 import org.springframework.data.domain.Pageable;
+import org.springframework.modulith.NamedInterface;
 
+@NamedInterface("UserService")
 public interface UserService {
     ResponseUserDTO createUser(CreateUserDTO createUserRequest);
 
